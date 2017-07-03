@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import json
 import os
+import time as Ti
 
 account_sid  = None
 auth_token = None
@@ -25,7 +26,7 @@ class Alert:
     def __init__(self, restaurant_name, date, times = []):
         self.restaurant_name = restaurant_name
         self.times = []
-        self.date =
+        self.date = date
 
 
 
@@ -70,7 +71,6 @@ def get_settings():
     else:
         Exception("Missing Arguments in 'account.json,' please include account_sid, auth_token, and twilio_number")
 
-def json_to_object(json):
 
 
 def get_availibility(r_list, driver):
@@ -80,6 +80,7 @@ def get_availibility(r_list, driver):
         for y in x.reservations:
 
             driver.get(x.link)
+
             # get day and date as numbers
             arr = y.date.split('/')
             # turn numeric date to text
@@ -95,24 +96,16 @@ def get_availibility(r_list, driver):
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')
                 elm.click()
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/div/span[1]')
+            # after we find the month we need to find the proper date
+            # elements = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody')
+            # find the element of the specific date
+            elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody/tr//a[text()=' +day +']'  )
+            # click the element
+            elm.click()
 
-            elements = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody')
+            elm = driver.find_element(By.XPATH, '//*[@id="diningAvailabilityForm-searchTime-dropdown-list"]//span[text()=' + y.time+']')
 
-            for dates in elements:
-                # needs to be tested
-                if dates.is_enabled() and str(dates.get_attribute("a")):
-                    print("hi")
-
-
-
-
-
-
-
-
-
-
-
+            elm.click()
 
 
 if __name__ == "__main__":
@@ -137,9 +130,11 @@ if __name__ == "__main__":
             date = y["date"]
             party= y["party"]
 
-            reservation_list.append(Reservation(time, date, party))
+            res = Reservation(time, date, party)
 
-        restaurant_list.append(Reservation(name, link, restaurant_list))
+            reservation_list.append(res)
+
+        restaurant_list.append(Restaurant(name, link, reservation_list ))
 
     #close file
     infile.close()
@@ -147,4 +142,8 @@ if __name__ == "__main__":
     #print(data)
 
     driver = webdriver.Chrome()
+
+    get_availibility(restaurant_list, driver)
+
+
 
