@@ -8,10 +8,15 @@ from twilio.rest.resources.connection import PROXY_TYPE_HTTP
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import json
 import os
 import time as Ti
 
+
+TIMEOUT = 5
 account_sid  = None
 auth_token = None
 twilio_number = None
@@ -102,10 +107,36 @@ def get_availibility(r_list, driver):
             elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody/tr//a[text()=' +day +']'  )
             # click the element
             elm.click()
-
-            elm = driver.find_element(By.XPATH, '//*[@id="diningAvailabilityForm-searchTime-dropdown-list"]//span[text()=' + y.time+']')
-
+            # click the dropdown list:
+            elm = driver.find_element(By.XPATH, '//*[@id="searchTime-wrapper"]/div[1]')
             elm.click()
+            # multiple ways to find the time in the DOM, the format for time has to be 'x:xx pm'/'x:xx am'
+            elm = driver.find_element(By.XPATH, '//*[@data-display="' +y.time+'"]')
+            elm.click()
+            # click on dropdown for party size
+            elm = driver.find_element(By.XPATH, '//*[@id="partySize-wrapper"]/div[1]')
+            elm.click()
+            # find element for party and click
+            elm = driver.find_element(By.XPATH, '//*[@data-value="'+y.party+'" and @role="option"]')
+            elm.click()
+
+            # click submit and search
+            elm = driver.find_element(By.XPATH, '//*[@id="dineAvailSearchButton"]')
+            elm.click()
+
+            try:
+                # search by class name
+                elm = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.CLASS_NAME, 'availableTime')))
+                elm = driver.find_elements(By.CLASS_NAME, 'availableTime')
+                for e in elm:
+                    print(e.text) # works
+            except TimeoutException:
+                print("waiting too long for element/no reservation")
+
+
+
+
+
 
 
 if __name__ == "__main__":
