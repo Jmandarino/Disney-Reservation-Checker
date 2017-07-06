@@ -10,8 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import json
 import os
-import time as TIME
-# need to rename time as there is an error where "time" is a string
+import threading
 
 
 TIMEOUT = 10
@@ -122,7 +121,7 @@ def get_availability(r_list, driver):
                 try:
                     elm = WebDriverWait(driver, TIMEOUT).until(
                         EC.element_to_be_clickable((By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')))
-                except:
+                except TimeoutException:
                     print("Couldn't click next on calender")
                     continue
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')
@@ -144,7 +143,7 @@ def get_availability(r_list, driver):
 
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.visibility_of_element_located((By.XPATH, '//*[@data-display="' +reservation.time+'"]')))
                 elm.click()
-            except:
+            except TimeoutException:
                 print("Can't find reservation time")
             # click on dropdown for party size
             elm = driver.find_element(By.XPATH, '//*[@id="partySize-wrapper"]/div[1]')
@@ -154,7 +153,7 @@ def get_availability(r_list, driver):
                 driver.implicitly_wait(1)
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, '//*[@data-value="'+reservation.party+'" and @role="option"]')))
                 elm.click()
-            except:
+            except TimeoutException:
                 print("can't select party size")
 
             # click submit and search
@@ -227,9 +226,7 @@ def send_alerts(alert_list):
 
 
 
-
-
-if __name__ == "__main__":
+def main():
     get_settings() # set global variables for texting service
     restaurant_list = []
 
@@ -265,6 +262,11 @@ if __name__ == "__main__":
     alerts = get_availability(restaurant_list, driver)
     send_alerts(alerts)
     driver.close() # close the window
+
+
+if __name__ == "__main__":
+    threading.Timer(60.0 * 5, main).start()
+
 
 
 
