@@ -1,6 +1,6 @@
 # python 3.5
 
-from twilio.rest import TwilioRestClient
+from twilio.rest import Client
 from twilio.rest.resources import Connection
 from twilio.rest.resources.connection import PROXY_TYPE_SOCKS4
 from twilio.rest.resources.connection import PROXY_TYPE_HTTP
@@ -78,15 +78,26 @@ def get_settings():
 
 
 
-def get_availibility(r_list, driver):
+def get_availability(r_list, driver):
+    """A function for returning a list of Alerts of Restaurants availability
+
+    get_availability searches the pages of websites's using Disney's own search feature
+    and returns a list of Alert's that will be sent back to the user via Text Messaging.
+
+    Args:
+        r_list (list): A list of Restaurant Params
+        driver (webdriver): A Selenium Webdriver Instance
+    Returns:
+        list: A list of Alert objects, if there are failures or no possible reservations this will return an empty list
+
+    """
     results = []
-    # get restraunt
+    # get restaurant
     for restaurant in r_list:
         # get reservation
         for reservation in restaurant.reservations:
 
             driver.get(restaurant.link)
-
             # get day and date as numbers
             arr = reservation.date.split('/')
             # turn numeric date to text
@@ -108,6 +119,12 @@ def get_availibility(r_list, driver):
             elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/div/span[1]')
             # until we have the correct month we click the next month
             while(elm.text.lower() != month.lower()):
+                try:
+                    elm = WebDriverWait(driver, TIMEOUT).until(
+                        EC.element_to_be_clickable((By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')))
+                except:
+                    print("Couldn't click next on calender")
+                    continue
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')
                 elm.click()
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/div/span[1]')
@@ -144,7 +161,7 @@ def get_availibility(r_list, driver):
 
             try:
                 # search by class name
-                Ti.sleep(2)
+                Ti.sleep(2) # needed to call sleep here, some issues on windows version on chrome
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.CLASS_NAME, 'availableTime')))
                 elm = driver.find_elements(By.CLASS_NAME, 'availableTime')
 
@@ -160,12 +177,32 @@ def get_availibility(r_list, driver):
     return results
 
 
+def send_alert(alert_list):
+    """A function for sending text alerts of Restaurants availability
 
+    send_alert sends a text message via the information given in the account.json file.
+
+    Args:
+        alert_list (list): A list of Alerts to send out
+        driver (webdriver): A Selenium Webdriver Instance
+    Returns:
+        None
+
+    """
+
+    client = Client(account_sid, auth_token)
+
+    message = client.api.account.messages.create(to=to_number ,
+                                                 from_=twilio_number,
+                                                body="testing")
 
 
 
 if __name__ == "__main__":
+    get_settings() # set global variables for texting service
     # stores list of restaurants
+    send_alert()
+    exit()
     restaurant_list = []
 
     # get restaurants
@@ -174,7 +211,7 @@ if __name__ == "__main__":
 
     data = json.load(infile)
 
-    #parse data and convert to objects
+    # parse data and convert to objects
     for x in data["places"]:
         name = x["name"]
         link = x["link"]
@@ -192,14 +229,12 @@ if __name__ == "__main__":
 
         restaurant_list.append(Restaurant(name, link, reservation_list ))
 
-    #close file
+    # close file
     infile.close()
-
-    #print(data)
 
     driver = webdriver.Chrome()
 
-    get_availibility(restaurant_list, driver)
+    get_availability(restaurant_list, driver)
 
 
 
