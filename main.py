@@ -1,9 +1,6 @@
 # python 3.5
 
 from twilio.rest import Client
-from twilio.rest.resources import Connection
-from twilio.rest.resources.connection import PROXY_TYPE_SOCKS4
-from twilio.rest.resources.connection import PROXY_TYPE_HTTP
 
 
 from selenium import webdriver
@@ -30,7 +27,7 @@ date_day = {"01":"January", "02":"February", "03":"March", "04":"April", "05":"M
 class Alert:
     def __init__(self, restaurant_name, date, times = []):
         self.restaurant_name = restaurant_name
-        self.times = []
+        self.times = times
         self.date = date
 
 
@@ -189,19 +186,37 @@ def send_alert(alert_list):
         None
 
     """
+    # no alerts to be sent
+    if alert_list is []:
+        return
 
     client = Client(account_sid, auth_token)
 
+    header="\nThere is a reservation open for:\n"
+
+    body = ""
+    for alert in alert_list:
+        body += header
+        body += alert.restaurant_name +" \n"
+        body += "at: "
+
+        for time in alert.times:
+            body += " " + time
+        body += "\n on Date:"
+        body += alert.date
+
+
+
     message = client.api.account.messages.create(to=to_number ,
                                                  from_=twilio_number,
-                                                body="testing")
+                                                body=body)
 
 
 
 if __name__ == "__main__":
     get_settings() # set global variables for texting service
     # stores list of restaurants
-    send_alert()
+    send_alert([Alert("ohana", "1/1/117", ["7:10", "7:05"])])
     exit()
     restaurant_list = []
 
