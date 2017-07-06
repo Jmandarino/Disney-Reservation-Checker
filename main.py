@@ -16,7 +16,7 @@ import os
 import time as Ti
 
 
-TIMEOUT = 5
+TIMEOUT = 10
 account_sid  = None
 auth_token = None
 twilio_number = None
@@ -79,18 +79,28 @@ def get_settings():
 
 
 def get_availibility(r_list, driver):
+    results = []
     # get restraunt
-    for x in r_list:
+    for restaurant in r_list:
         # get reservation
-        for y in x.reservations:
+        for reservation in restaurant.reservations:
 
-            driver.get(x.link)
+            driver.get(restaurant.link)
 
             # get day and date as numbers
-            arr = y.date.split('/')
+            arr = reservation.date.split('/')
             # turn numeric date to text
             month = date_day[arr[0]]
             day = arr[1]
+
+            try:
+                element = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located(
+                    (By.XPATH,'//*[@id="diningAvailabilityForm-searchDateid-base"]/div/button')))
+            except:
+                print("couldn't load page")
+                continue
+
+
             # open the calender
             elm = driver.find_element(By.XPATH, '//*[@id="diningAvailabilityForm-searchDateid-base"]/div/button')
             elm.click()
@@ -111,14 +121,22 @@ def get_availibility(r_list, driver):
             elm = driver.find_element(By.XPATH, '//*[@id="searchTime-wrapper"]/div[1]')
             elm.click()
             # multiple ways to find the time in the DOM, the format for time has to be 'x:xx pm'/'x:xx am'
-            elm = driver.find_element(By.XPATH, '//*[@data-display="' +y.time+'"]')
-            elm.click()
+
+            try:
+
+                elm = WebDriverWait(driver, TIMEOUT).until(EC.visibility_of_element_located((By.XPATH, '//*[@data-display="' +reservation.time+'"]')))
+                elm.click()
+            except:
+                print("Can't find reservation time")
             # click on dropdown for party size
             elm = driver.find_element(By.XPATH, '//*[@id="partySize-wrapper"]/div[1]')
             elm.click()
             # find element for party and click
-            elm = driver.find_element(By.XPATH, '//*[@data-value="'+y.party+'" and @role="option"]')
-            elm.click()
+            try:
+                elm = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, '//*[@data-value="'+reservation.party+'" and @role="option"]')))
+                elm.click()
+            except:
+                print("can't select party size")
 
             # click submit and search
             elm = driver.find_element(By.XPATH, '//*[@id="dineAvailSearchButton"]')
@@ -126,13 +144,20 @@ def get_availibility(r_list, driver):
 
             try:
                 # search by class name
+                Ti.sleep(2)
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.CLASS_NAME, 'availableTime')))
                 elm = driver.find_elements(By.CLASS_NAME, 'availableTime')
+
+                times = []
                 for e in elm:
-                    print(e.text) # works
+                    times.append(e.text)
+
+                alert = Alert(restaurant.name, reservation.date, times)
+                results.append(alert)
             except TimeoutException:
                 print("waiting too long for element/no reservation")
 
+    return results
 
 
 
