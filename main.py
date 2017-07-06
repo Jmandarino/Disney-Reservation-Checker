@@ -10,7 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import json
 import os
-import time as Ti
+import time as TIME
+# need to rename time as there is an error where "time" is a string
 
 
 TIMEOUT = 10
@@ -101,8 +102,10 @@ def get_availability(r_list, driver):
             month = date_day[arr[0]]
             day = arr[1]
 
+            # problems consistently loading, sleeping to let the page load
+            driver.implicitly_wait(1)
             try:
-                element = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located(
+                element = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable(
                     (By.XPATH,'//*[@id="diningAvailabilityForm-searchDateid-base"]/div/button')))
             except:
                 print("couldn't load page")
@@ -128,6 +131,7 @@ def get_availability(r_list, driver):
             # after we find the month we need to find the proper date
             # elements = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody')
             # find the element of the specific date
+            driver.implicitly_wait(1)
             elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody/tr//a[text()=' +day +']'  )
             # click the element
             elm.click()
@@ -147,6 +151,7 @@ def get_availability(r_list, driver):
             elm.click()
             # find element for party and click
             try:
+                driver.implicitly_wait(1)
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, '//*[@data-value="'+reservation.party+'" and @role="option"]')))
                 elm.click()
             except:
@@ -158,7 +163,7 @@ def get_availability(r_list, driver):
 
             try:
                 # search by class name
-                Ti.sleep(2) # needed to call sleep here, some issues on windows version on chrome
+                driver.implicitly_wait(2)# needed to call sleep here, some issues on windows version on chrome
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.presence_of_element_located((By.CLASS_NAME, 'availableTime')))
                 elm = driver.find_elements(By.CLASS_NAME, 'availableTime')
 
@@ -173,8 +178,23 @@ def get_availability(r_list, driver):
 
     return results
 
+def send_text(body, number):
+    """A wrapper function to send texts to one user
+    
+    send_text sends a message to a single user
+    Args:
+        body (String): The message to send
+        number (String): Phone number to send to
+    Returns:
+        None
+        
+    """
+    client = Client(account_sid, auth_token)
+    message = client.api.account.messages.create(to=number,
+                                                 from_=twilio_number,
+                                                 body=body)
 
-def send_alert(alert_list):
+def send_alerts(alert_list):
     """A function for sending text alerts of Restaurants availability
 
     send_alert sends a text message via the information given in the account.json file.
@@ -186,16 +206,15 @@ def send_alert(alert_list):
         None
 
     """
+
     # no alerts to be sent
     if alert_list is []:
         return
 
-    client = Client(account_sid, auth_token)
-
     header="\nThere is a reservation open for:\n"
 
-    body = ""
     for alert in alert_list:
+        body = ""
         body += header
         body += alert.restaurant_name +" \n"
         body += "at: "
@@ -204,20 +223,14 @@ def send_alert(alert_list):
             body += " " + time
         body += "\n on Date:"
         body += alert.date
+        send_text(body, to_number)
 
 
-
-    message = client.api.account.messages.create(to=to_number ,
-                                                 from_=twilio_number,
-                                                body=body)
 
 
 
 if __name__ == "__main__":
     get_settings() # set global variables for texting service
-    # stores list of restaurants
-    send_alert([Alert("ohana", "1/1/117", ["7:10", "7:05"])])
-    exit()
     restaurant_list = []
 
     # get restaurants
@@ -249,7 +262,9 @@ if __name__ == "__main__":
 
     driver = webdriver.Chrome()
 
-    get_availability(restaurant_list, driver)
+    alerts = get_availability(restaurant_list, driver)
+    send_alerts(alerts)
+    driver.close() # close the window
 
 
 
