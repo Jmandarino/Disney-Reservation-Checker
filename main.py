@@ -32,8 +32,6 @@ class Alert:
 
 
 
-
-
 class Reservation:
     def __init__(self, time, date, party):
         self.time = time
@@ -227,6 +225,8 @@ def send_alerts(alert_list):
 
 
 def main():
+    # threading to make sure the fuction is running every 5 minutes
+    threading.Timer(60.0 * 5, main).start()
     get_settings() # set global variables for texting service
     restaurant_list = []
 
@@ -259,13 +259,15 @@ def main():
 
     driver = webdriver.Chrome()
 
-    alerts = get_availability(restaurant_list, driver)
-    send_alerts(alerts)
-    driver.close() # close the window
+    try:
+        alerts = get_availability(restaurant_list, driver)
+        send_alerts(alerts)
+    finally:
+        driver.close() # close the window
 
 
 if __name__ == "__main__":
-    threading.Timer(60.0 * 5, main).start()
+    main()
 
 
 
