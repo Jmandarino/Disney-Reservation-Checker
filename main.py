@@ -11,6 +11,7 @@ from selenium.common.exceptions import TimeoutException
 import json
 import os
 import threading
+import time as TIME
 
 # These varibles will be used for Texting services
 TIMEOUT = 10
@@ -139,7 +140,7 @@ def get_availability(r_list, driver):
             day = arr[1]
 
             # problems consistently loading, sleeping to let the page load
-            driver.implicitly_wait(1)
+            TIME.sleep(1) # full sleep because the python program is going faster than the website can handle
             try:
                 element = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable(
                     (By.XPATH,'//*[@id="diningAvailabilityForm-searchDateid-base"]/div/button')))
@@ -167,7 +168,7 @@ def get_availability(r_list, driver):
             # after we find the month we need to find the proper date
             # elements = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody')
             # find the element of the specific date
-            driver.implicitly_wait(1)
+            TIME.sleep(1) # full sleep because the python program is going faster than the website can handle
             elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody/tr//a[text()=' +day +']'  )
             # click the element
             elm.click()
@@ -187,7 +188,7 @@ def get_availability(r_list, driver):
             elm.click()
             # find element for party and click
             try:
-                driver.implicitly_wait(1)
+                TIME.sleep(1) # full sleep because the python program is going faster than the website can handle
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.element_to_be_clickable((By.XPATH, '//*[@data-value="'+reservation.party+'" and @role="option"]')))
                 elm.click()
             except TimeoutException:

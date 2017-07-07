@@ -7,17 +7,11 @@
 				"time": "7:00pm",
 				"date": "08/27/17",
                 "party":"2"
-			}
-		]
-	},
-      {
-		"name": "50's prime",
-		  "link": "https://disneyworld.disney.go.com/dining/hollywood-studios/50s-prime-time-cafe/",
-		"reservations": [{
-				"time": "7:00 pm",
-				"date": "12/18/17",
-                "party":"2"
-			}
+			}, {
+			"time": "7:00pm",
+				"date": "08/27/17",
+                "party":"3"
+		}
 		]
 	}
     ]
