@@ -12,7 +12,7 @@ import json
 import os
 import threading
 
-
+# These varibles will be used for Texting services
 TIMEOUT = 10
 account_sid  = None
 auth_token = None
@@ -20,27 +20,62 @@ twilio_number = None
 to_number = None
 
 
-date_day = {"01":"January", "02":"February", "03":"March", "04":"April", "05":"May",
-            "06":"June", "07":"July", "08":"August", "09":"September", "10":"October",
-            "11": "November", "12":"December"}
+# a dictionary to convert numeric date into phonetic form
+date_day = {"01": "January", "02": "February", "03": "March", "04": "April", "05": "May",
+            "06": "June", "07": "July", "08": "August", "09": "September", "10": "October",
+            "11": "November", "12": "December"}
+
 
 class Alert:
+    """An Object Representation of a Text Alert
+    
+    This class is used to store the information that will be texted to the user. An Alert represents available 
+    reservations for a restaurant. 
+    
+    Attributes:
+        restaurant_name (str): Name of the restaurant the user is looking to make a reservation at
+        date (str): A string of when the reservation is available. 
+        times (:obj: `list`): List of available times that were found via webscraping. Default value is an empty list
+    
+    """
     def __init__(self, restaurant_name, date, times = []):
         self.restaurant_name = restaurant_name
         self.times = times
         self.date = date
 
 
-
 class Reservation:
+    """An object representation of all the information needed to search for a reservation in disney's website
+    
+    A reservation at disney requires a time, a party size and a date. The website returns possible reservation for a 
+    specific date and time range if a reservation of the time the user chooses isn't currently available.
+     
+     Attributes:
+         time (str): The time a user wants to eat in the specific format : HH:MM pm/am. Capitalization matters.
+         date (date): The date a user wants to make a reservation for. format: DD:MM:YY
+         party (str): The amount of people who will be eating at for the reservation
+    
+    
+    """
     def __init__(self, time, date, party):
         self.time = time
         self.party = party
         self.date = date
 
 
-
 class Restaurant:
+    """Information and details about the Restaurant a user wants to make a reservation at
+     
+     A Restaurant at disney as a distinct website that we can use to search for reservations. This object will have a 
+     list of possible reservations a user would like to make for one specific restaurant.
+     
+     Attributes:
+         name (str): The Name of the restaurant
+         reservations (:obj: `list` of :obj: `Reservation`): A list of reservation that the user is looking for
+         link (str): link to the websites specific website
+    
+    
+    """
     def __init__(self, name, link,  reservations = []):
         self.name = name
         self.reservations = reservations
@@ -49,7 +84,10 @@ class Restaurant:
 
 
 def get_settings():
+    """Sets up the variables that Twilio Api needs to send a text message
+    """
 
+    # check for the account.json file if not found we cannot continue the program
     if os.path.isfile("account.json"):
         json_data = open("account.json").read()
         data = json.loads(json_data)
@@ -69,6 +107,7 @@ def get_settings():
         auth_token = data['auth_token']
         twilio_number = data['twilio_number']
     else:
+        # if there is any missind data we need to throw an exception and end the program
         Exception("Missing Arguments in 'account.json,' please include account_sid, auth_token, and twilio_number")
 
 
@@ -180,8 +219,8 @@ def send_text(body, number):
     
     send_text sends a message to a single user
     Args:
-        body (String): The message to send
-        number (String): Phone number to send to
+        body (str): The message to send
+        number (str): Phone number to send to
     Returns:
         None
         
@@ -227,7 +266,6 @@ def send_alerts(alert_list):
 def main():
     # threading to make sure the fuction is running every 5 minutes
     threading.Timer(60.0 * 5, main).start()
-    get_settings() # set global variables for texting service
     restaurant_list = []
 
     # get restaurants
@@ -267,6 +305,7 @@ def main():
 
 
 if __name__ == "__main__":
+    get_settings()  # set global variables for texting service
     main()
 
 
