@@ -8,7 +8,7 @@ When booking a vacation at Walt Disney World you can reserve a table up to 180 d
  checking for new reservations. 
  
  
- ###How it works
+ ### How it works
  
  This Python program leverages Selenium to check a list of restaurants and reservations you want to make every 5 minutes by
  spawning a copy of a ChromeDriver and using Disney's website to check for a reservation. The website is then processed and 
