@@ -178,7 +178,7 @@ def get_availability(r_list, driver):
             # multiple ways to find the time in the DOM, the format for time has to be 'x:xx pm'/'x:xx am'
 
             try:
-
+                TIME.sleep(1)
                 elm = WebDriverWait(driver, TIMEOUT).until(EC.visibility_of_element_located((By.XPATH, '//*[@data-display="' +reservation.time+'"]')))
                 elm.click()
             except TimeoutException:
