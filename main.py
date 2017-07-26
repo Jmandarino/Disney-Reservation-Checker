@@ -155,7 +155,13 @@ def get_availability(r_list, driver):
             # get the month at the top of the calender
             elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/div/span[1]')
             # until we have the correct month we click the next month
+            counter = 0
             while(elm.text.lower() != month.lower()):
+
+                # reservations can't be made more than 6 months in advanced
+                # the program is getting stuck and sometimes missing the proper month
+                if counter > 6:
+                    break
                 try:
                     elm = WebDriverWait(driver, TIMEOUT).until(
                         EC.element_to_be_clickable((By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')))
@@ -165,6 +171,11 @@ def get_availability(r_list, driver):
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/a[2]')
                 elm.click()
                 elm = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/div/div/span[1]')
+                counter += 1
+
+            # if we have searched too far there is an error and we exit.
+            if counter > 6:
+                break
             # after we find the month we need to find the proper date
             # elements = driver.find_element(By.XPATH, '//*[@id="ui-datepicker-div"]/table/tbody')
             # find the element of the specific date
