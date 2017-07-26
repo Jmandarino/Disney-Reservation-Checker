@@ -18,7 +18,7 @@ TIMEOUT = 10
 account_sid  = None
 auth_token = None
 twilio_number = None
-to_number = None
+to_numbers = None
 
 
 # a dictionary to convert numeric date into phonetic form
@@ -97,8 +97,8 @@ def get_settings():
 
 
     if data["to_phone_number"]:
-        global to_number
-        to_number = data["to_phone_number"]
+        global to_numbers
+        to_numbers = data["to_phone_number"]
 
     if data['account_sid'] and data['auth_token'] and data['twilio_number']:
         global account_sid
@@ -249,7 +249,6 @@ def send_alerts(alert_list):
 
     Args:
         alert_list (list): A list of Alerts to send out
-        driver (webdriver): A Selenium Webdriver Instance
     Returns:
         None
 
@@ -271,12 +270,15 @@ def send_alerts(alert_list):
             body += " " + time
         body += "\n on Date:"
         body += alert.date
-        send_text(body, to_number)
+
+        # support for multiple numbers
+        for x in to_numbers:
+            send_text(body, x)
 
 
 
 def main():
-    # threading to make sure the fuction is running every 5 minutes
+    # threading to make sure the function is running every 5 minutes
     threading.Timer(60.0 * 5, main).start()
     restaurant_list = []
 

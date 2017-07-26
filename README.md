@@ -95,7 +95,7 @@ When booking a vacation at Walt Disney World you can reserve a table up to 180 d
   "account_sid": "",
   "auth_token":"",
   "twilio_number":"+11234567890",
-  "to_phone_number": "+"
+  "to_phone_number": ["+1234567890","+1234567890"]
  }
 
 
@@ -105,7 +105,8 @@ When booking a vacation at Walt Disney World you can reserve a table up to 180 d
 
 **twilio_number**: To obtain a twilio number follow this [link](https://www.twilio.com/console/phone-numbers/getting-started)
 
-**to_phone_number**: Must be a *Verified* number on your twilio account. Please follow the directions to verify your phone number
+**to_phone_number**: Must be a *Verified* number on your twilio account. Please follow the directions to verify 
+your phone number. This program now supports multiple phone numbers as an array input. 
 [here](https://www.twilio.com/console/phone-numbers/verified)
 
 
