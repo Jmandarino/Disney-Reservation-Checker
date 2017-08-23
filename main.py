@@ -39,10 +39,11 @@ class Alert:
         times (:obj: `list`): List of available times that were found via webscraping. Default value is an empty list
     
     """
-    def __init__(self, restaurant_name, date, times = []):
+    def __init__(self, restaurant_name, date, party, times = [] ):
         self.restaurant_name = restaurant_name
         self.times = times
         self.date = date
+        self.party = party
 
 
 class Reservation:
@@ -220,7 +221,7 @@ def get_availability(r_list, driver):
                 for e in elm:
                     times.append(e.text)
 
-                alert = Alert(restaurant.name, reservation.date, times)
+                alert = Alert(restaurant.name, reservation.date, reservation.party, times)
                 results.append(alert)
             except TimeoutException:
                 print("waiting too long for element/no reservation")
@@ -265,12 +266,15 @@ def send_alerts(alert_list):
         body = ""
         body += header
         body += alert.restaurant_name +" \n"
-        body += "at: "
+        body += " at: "
 
         for time in alert.times:
             body += " " + time
-        body += "\n on Date:"
+        body += "\n on Date: "
         body += alert.date
+        body += "\n For: "
+        body += alert.party
+
 
         # support for multiple numbers
         for x in to_numbers:
