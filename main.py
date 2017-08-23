@@ -89,7 +89,7 @@ def get_settings():
     """Sets up the variables that Twilio Api needs to send a text message
     """
 
-    # check for the account.json file if not found we cannot continue the program
+    # check for the accounts.json file if not found we cannot continue the program
     if os.path.isfile("accounts.json"):
         json_data = open("accounts.json").read()
         data = json.loads(json_data)
