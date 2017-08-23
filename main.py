@@ -93,7 +93,8 @@ def get_settings():
         json_data = open("account.json").read()
         data = json.loads(json_data)
     else:
-        Exception("No 'account.json' file found")
+        raise Exception("No 'account.json' file found")
+        # crash the program
 
 
     if data["to_phone_number"]:
