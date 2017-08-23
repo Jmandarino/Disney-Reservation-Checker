@@ -90,11 +90,11 @@ def get_settings():
     """
 
     # check for the account.json file if not found we cannot continue the program
-    if os.path.isfile("account.json"):
-        json_data = open("account.json").read()
+    if os.path.isfile("accounts.json"):
+        json_data = open("accounts.json").read()
         data = json.loads(json_data)
     else:
-        raise Exception("No 'account.json' file found")
+        raise Exception("No 'accounts.json' file found")
         # crash the program
 
 
@@ -111,7 +111,7 @@ def get_settings():
         twilio_number = data['twilio_number']
     else:
         # if there is any missind data we need to throw an exception and end the program
-        Exception("Missing Arguments in 'account.json,' please include account_sid, auth_token, and twilio_number")
+        Exception("Missing Arguments in 'accounts.json,' please include account_sid, auth_token, and twilio_number")
 
 
 
@@ -247,7 +247,7 @@ def send_text(body, number):
 def send_alerts(alert_list):
     """A function for sending text alerts of Restaurants availability
 
-    send_alert sends a text message via the information given in the account.json file.
+    send_alert sends a text message via the information given in the accounts.json file.
 
     Args:
         alert_list (list): A list of Alerts to send out
