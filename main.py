@@ -1,5 +1,5 @@
 # python 3.5
-
+# TODO: set up logging
 from twilio.rest import Client
 
 
@@ -13,7 +13,7 @@ import os
 import threading
 import time as TIME
 
-# These varibles will be used for Texting services
+# These variables will be used for Texting services
 TIMEOUT = 10
 account_sid  = None
 auth_token = None
@@ -262,6 +262,7 @@ def send_alerts(alert_list):
 
     header="\nThere is a reservation open for:\n"
 
+    # TODO: look into list comprehensions to simiplify
     for alert in alert_list:
         body = ""
         body += header
